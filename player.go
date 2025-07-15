@@ -118,6 +118,7 @@ func (p *Player) Wear(args []string) string {
 	return "нет такого"
 }
 
+//
 func (p *Player) Apply(args []string) string {
 	if len(args) < 2 {
 		return "не хватает аргументов"
