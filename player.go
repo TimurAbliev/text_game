@@ -37,7 +37,8 @@ func (p *Player) Look() string {
 		}
 		if chairItem != "" {
 			if desc != "" {
-				desc += ". "
+				// Если есть и стол, и стул, то после стола запятая, а не точка
+				desc += ", "
 			}
 			desc += "на стуле: " + chairItem
 		}
