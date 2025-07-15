@@ -18,37 +18,31 @@ func (p *Player) Look() string {
 		}
 		return "ты находишься на кухне, на столе: чай, надо собрать рюкзак и идти в универ. можно пройти - коридор"
 	case "комната":
-		list := []string{}
-		for item := range room.objects {
-			list = append(list, item)
-		}
-		if len(list) == 0 {
-			return "пустая комната. можно пройти - коридор"
-		}
-
-		s := "на столе:"
+		var tableItems []string
+		var chairItem string
 		for item, place := range room.objects {
 			if place == "на столе" {
-				s += " " + item + ","
+				tableItems = append(tableItems, item)
 			}
-		}
-		s = strings.TrimSuffix(s, ",")
-		if strings.Contains(s, ":") && !strings.Contains(s, " ") {
-			s = ""
-		}
-		stul := ""
-		for item, place := range room.objects {
 			if place == "на стуле" {
-				stul += item
+				chairItem = item
 			}
 		}
-		if s != "" && stul != "" {
-			return s + ". на стуле: " + stul + ". можно пройти - коридор"
-		} else if s != "" {
-			return s + ". можно пройти - коридор"
-		} else if stul != "" {
-			return "на стуле: " + stul + ". можно пройти - коридор"
+		if len(tableItems) == 0 && chairItem == "" {
+			return "пустая комната. можно пройти - коридор"
 		}
+		desc := ""
+		if len(tableItems) > 0 {
+			desc += "на столе: " + strings.Join(tableItems, ", ")
+		}
+		if chairItem != "" {
+			if desc != "" {
+				desc += ". "
+			}
+			desc += "на стуле: " + chairItem
+		}
+		desc += ". можно пройти - коридор"
+		return desc
 	}
 	if room.name == "коридор" {
 		return "ничего интересного. можно пройти - кухня, комната, улица"
@@ -95,6 +89,7 @@ func (p *Player) Take(args []string) string {
 	item := args[0]
 	room := p.location
 	if _, ok := room.objects[item]; !ok {
+		// Если предмета нет в комнате и он не был взят ранее, тоже "нет такого"
 		return "нет такого"
 	}
 	if !p.wearingBag {
@@ -110,6 +105,9 @@ func (p *Player) Wear(args []string) string {
 		return "что надеть?"
 	}
 	if args[0] == "рюкзак" {
+		if p.wearingBag {
+			return "нет такого"
+		}
 		if place, ok := p.location.objects["рюкзак"]; ok && place == "на стуле" {
 			delete(p.location.objects, "рюкзак")
 			p.wearingBag = true
